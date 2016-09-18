@@ -7,17 +7,17 @@
   1. If your `docker` requires Virtual Box to run you need to initialise `docker-machine`.
     1. It is a good idea to increase capacity and performance of your `docker-machine`.
     1. If you are happy to do so, remove the existing machine called `default` by running 
-```
-docker-machine rm default
-```
+    ```
+    docker-machine rm default
+    ```
     1. Re-create `default` machine with 100GB disk capacity:
-```
-docker-machine create -d virtualbox --virtualbox-disk-size "100000" default
-```
+    ```
+    docker-machine create -d virtualbox --virtualbox-disk-size "100000" default
+    ```
     1. Set up the environment for the `docker` client. See the output of 
-```
-docker-machine env default
-```
+    ```
+    docker-machine env default
+    ```
     
 1. Pull required images so that not to overload conference network.
 ```

@@ -15,7 +15,8 @@ docker-machine rm default
 docker-machine create -d virtualbox --virtualbox-disk-size "100000" default
 ```
     1. Set up the environment for the `docker` client. See the output of 
-```docker-machine env default
+```
+docker-machine env default
 ```
     
 1. Pull required images so that not to overload conference network.

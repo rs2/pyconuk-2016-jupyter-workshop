@@ -1,0 +1,87 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+---
+version: "2"
+
+services:
+  dashboards_notebook:
+    build:
+      context: .
+      dockerfile: Dockerfile.notebook
+      args:
+        IPYWIDGETS_VER: "5.2.*"
+        DASHBOARDS_VER: "0.6.*"
+        CMS_VER: "0.6.*"
+        BUNDLER_VER: "0.8.*"
+    ports:
+      - "8888:8888"
+    depends_on:
+      - dashboards_server
+    links:
+      - dashboards_server
+    env_file: nb_secrets.env
+    environment:
+      DASHBOARD_SERVER_URL: http://dashboards_server:3000/
+      KG_URL: http://dashboards_kernel_gateway:9888
+    restart: always
+    container_name: rs2-dashboards-notebook
+
+  dashboards_server:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboards
+      args:
+          DASHBOARDS_SERVER_VER: ">=0.7.0"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - dashboards_kernel_gateway
+    links:
+      - dashboards_kernel_gateway
+    env_file: db_secrets.env
+    environment:
+      PORT: 3000
+      KERNEL_GATEWAY_URL: http://dashboards_kernel_gateway:9888
+    restart: always
+    container_name: rs2-dashboards-server
+
+  dashboards_kernel_gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.kernel
+      args:
+        IPYWIDGETS_VER: "5.2.*"
+        KG_VER: "1.0.*"
+        BOKEH_VER: "0.11.*"
+    ports:
+     - "9888:9888"
+    environment:
+      KG_ALLOW_ORIGIN: "*"
+      KG_LIST_KERNELS: "True"
+      KG_PORT: "9888"
+      KG_API_URL: http://dashboards_kg_api_demo:8081
+    restart: always
+    container_name: rs2-dashboards-kernel-gateway
+ 
+  dashboards_kg_api_demo:
+    build:
+      context: .
+      dockerfile: Dockerfile.kernel
+      args:
+        IPYWIDGETS_VER: "5.2.*"
+        KG_VER: "1.0.*"
+        BOKEH_VER: "0.11.*"
+    ports:
+     - "8081:8081"
+    environment:
+      KG_ALLOW_ORIGIN: "*"
+      KG_LIST_KERNELS: "True"
+    restart: always
+    container_name: rs2-kg-api-demo
+    command: >
+        jupyter kernelgateway 
+        --KernelGatewayApp.ip=0.0.0.0 
+        --KernelGatewayApp.port=8081
+        --KernelGatewayApp.api='kernel_gateway.notebook_http'
+        --KernelGatewayApp.seed_uri='/srv/api/api_demo.ipynb'
